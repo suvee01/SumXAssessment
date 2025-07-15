@@ -11,5 +11,7 @@ namespace SumXAssginment.Application.Manager.Interface
     public interface ITenantManager
     {
         Task<ResponseStatus<string>> CreateTenant(TenantDto command,CancellationToken cancellationToken);
+        Task<ResponseStatus<string>> UpdateTenant(TenantDto command,CancellationToken cancellationToken);
+        Task<ResponseStatus<string>> DeleteTenant(string tenantId, CancellationToken cancellationToken);
     }
 }

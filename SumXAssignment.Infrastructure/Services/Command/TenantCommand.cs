@@ -23,6 +23,17 @@ namespace SumXAssignment.Infrastructure.Services.Command
             await _context.SaveChangesAsync(cancellationToken);
             return tenant.TenantId;
         }
+        public async Task UpdateTenantAsync(ETenant tenant, CancellationToken cancellationToken)
+        {
+            _context.Tenants.Update(tenant);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        
+    public async Task DeleteTenantAsync(ETenant tenant, CancellationToken cancellationToken)
+        {
+            _context.Tenants.Remove(tenant);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
 
     }
 }

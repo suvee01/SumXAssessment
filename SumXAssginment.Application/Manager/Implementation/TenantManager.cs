@@ -1,4 +1,4 @@
-﻿using SumXAssginment.Application.DTOs.Request;
+using SumXAssginment.Application.DTOs.Request;
 using SumXAssginment.Application.Helper;
 using SumXAssginment.Application.Manager.Interface;
 using SumXAssignment.Domain.Entities;
@@ -45,8 +45,22 @@ namespace SumXAssginment.Application.Manager.Implementation
                 string tenantId = await _tenantQuery.GenerateNextTenantIdAsync();
                 var eTenant = ParseToETenant(command, tenantId);
                 await _tenantCommand.CreateTenantAsync(eTenant, cancellationToken);
-                var eUser = ParseToEUser(command);
-                string userId = await _userCommand.AddUserAsync(eUser, cancellationToken);
+                
+                // Create default user for the tenant
+                var eUser = ParseToEUser(command, eTenant.Id);
+                string defaultPassword = $"Tenant{tenantId}";
+                string userId = await _userCommand.CreateUserWithPasswordAsync(eUser, defaultPassword, cancellationToken);
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return new ResponseStatus<string>()
+                    {
+                        Status = (int)HttpStatusCode.InternalServerError,
+                        Data = "",
+                        Message = "Failed to create default user for tenant."
+                    };
+                }
+                
                 string roleId = await _userCommand.AddTenantRoleAsync("Tenant", cancellationToken);
                 await _userCommand.AddUserRoleAsync(userId, roleId, cancellationToken);
                 return Response(true, "Successfully added", tenantId);
@@ -57,6 +71,105 @@ namespace SumXAssginment.Application.Manager.Implementation
             }
 
         }
+
+        public async Task<ResponseStatus<string>> UpdateTenant(TenantDto command, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(command.Id))
+                {
+                    return new ResponseStatus<string>
+                    {
+                        Status = (int)HttpStatusCode.BadRequest,
+                        Data = "",
+                        Message = "Tenant ID is required."
+                    };
+                }
+
+                if (string.IsNullOrEmpty(command.Name))
+                {
+                    return new ResponseStatus<string>
+                    {
+                        Status = (int)HttpStatusCode.BadRequest,
+                        Data = "",
+                        Message = "Tenant name is required."
+                    };
+                }
+
+                // Retrieve the existing tenant
+                var existingTenant = await _tenantQuery.GetTenantByIdAsync(command.Id, cancellationToken);
+                if (existingTenant == null)
+                {
+                    return new ResponseStatus<string>
+                    {
+                        Status = (int)HttpStatusCode.NotFound,
+                        Data = "",
+                        Message = "Tenant not found."
+                    };
+                }
+
+                // Update tenant properties
+                existingTenant.Name = command.Name;
+                existingTenant.EmailAddress = command.EmailAddress;
+
+                // update changes
+                await _tenantCommand.UpdateTenantAsync(existingTenant, cancellationToken);
+
+                return new ResponseStatus<string>
+                {
+                    Status = (int)HttpStatusCode.OK,
+                    Data = existingTenant.TenantId,
+                    Message = "Tenant updated successfully."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseStatus<string>
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Data = "",
+                    Message = "Something went wrong"
+                };
+            }
+        }
+
+        public async Task<ResponseStatus<string>> DeleteTenant(string tenantId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // Retrieve the existing tenant
+                var existingTenant = await _tenantQuery.GetTenantByIdAsync(tenantId, cancellationToken);
+                if (existingTenant == null)
+                {
+                    return new ResponseStatus<string>
+                    {
+                        Status = (int)HttpStatusCode.NotFound,
+                        Data = "",
+                        Message = "Tenant not found."
+                    };
+                }
+
+                // Delete the tenant
+                await _tenantCommand.DeleteTenantAsync(existingTenant, cancellationToken);
+
+                return new ResponseStatus<string>
+                {
+                    Status = (int)HttpStatusCode.OK,
+                    Data = tenantId,
+                    Message = "Tenant deleted successfully."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseStatus<string>
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Data = "",
+                    Message = "Something went wrong"
+                };
+            }
+        }
+
 
         private ETenant ParseToETenant(TenantDto command, string tenantId)
         {
@@ -69,7 +182,7 @@ namespace SumXAssginment.Application.Manager.Implementation
             return tenant;
         }
 
-        private EUser ParseToEUser(TenantDto command)
+        private EUser ParseToEUser(TenantDto command, string tenantId)
         {
             var user = new EUser()
             {
@@ -77,21 +190,10 @@ namespace SumXAssginment.Application.Manager.Implementation
                 UserName = command.EmailAddress,
                 Email = command.EmailAddress,
                 EmailConfirmed = true,
-                TenantId = command.Id,
+                TenantId = tenantId,
             };
             return user;
         }
-        //public string TenantId(string isExistedTenantId)
-        //{
-        //    if (string.IsNullOrEmpty(isExistedTenantId))
-        //    {
-        //        int nextNumber = 1;
-        //        if (isExistedTenantId != null && int.TryParse(isExistedTenantId.TenantId[1..], out int lastNum))
-        //            nextNumber = lastNum + 1;
-
-        //        return $"T{nextNumber}";
-        //    }
-        //}
 
         private ResponseStatus<string> Response(bool isSuccess, string message, string tenantId)
         {

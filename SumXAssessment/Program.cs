@@ -12,23 +12,32 @@ using System.Text; // Ensure this namespace is added
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAuthenticationService(builder.Configuration);
-
 // Add services to the container.  
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-
 builder.Services.AddControllers();
 
 builder.Services.AddApplicationService(builder.Configuration);
 builder.Services.AddSumXAssignmentInfraServices(builder.Configuration);
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerServices(builder.Configuration);
 
-builder.Services.AddIdentity<EUser, IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+
+// Configure Identity
+builder.Services.AddIdentity<EUser, IdentityRole>(options =>
+{
+    options.Password.RequiredLength = 6;
+    options.Password.RequireDigit = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = false;
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+
+// Configure JWT Authentication
+builder.Services.AddAuthenticationService(builder.Configuration);
 
 var app = builder.Build();
 
@@ -41,6 +50,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

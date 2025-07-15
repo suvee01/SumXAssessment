@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SumXAssignment.Domain.Entities;
 using SumXAssignment.Domain.Interface.IQuery;
 using SumXAssignment.Infrastructure.Repository;
 using System;
@@ -18,27 +19,6 @@ namespace SumXAssignment.Infrastructure.Services.Query
         }
         public async Task<string> GenerateNextTenantIdAsync()
         {
-            try
-            {
-                //var lastTenant = await _context.Tenants.OrderByDescending(x => x.TenantId).LastOrDefaultAsync();
-
-                //int nextNumber = 1;
-                //if (lastTenant != null && int.TryParse(lastTenant.TenantId[1..], out int lastNum))
-                //    nextNumber = lastNum + 1;
-
-                //return $"T{nextNumber}";
-
-                //var lastTenant = await _context.Tenants
-                //.OrderByDescending(x =>
-                //    int.TryParse(x.TenantId.Substring(1), out var num) ? num : 0)
-                //.FirstOrDefaultAsync();
-
-                //int nextNumber = 1;
-                //if (lastTenant != null && int.TryParse(lastTenant.TenantId[1..], out int lastNum))
-                //    nextNumber = lastNum + 1;
-
-                //return $"T{nextNumber}";
-
                 try
                 {
                     // Fetch all TenantIds into memory
@@ -59,13 +39,13 @@ namespace SumXAssignment.Infrastructure.Services.Query
                 {
                     throw;
                 }
-
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            
         }
+
+        public async Task<ETenant?> GetTenantByIdAsync(string tenantId, CancellationToken cancellationToken)
+        {
+            return await _context.Tenants
+                .FirstOrDefaultAsync(t => t.Id == tenantId, cancellationToken);
+        }
+
     }
 }

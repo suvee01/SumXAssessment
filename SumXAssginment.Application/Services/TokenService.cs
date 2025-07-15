@@ -18,6 +18,7 @@ namespace SumXAssginment.Application.Services
 
         public string GenerateToken(EUser user, string role)
         {
+            var jwtkey = _configuration["Jwt:Key"];
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 

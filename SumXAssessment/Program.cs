@@ -21,6 +21,8 @@ builder.Services.AddSumXAssignmentInfraServices(builder.Configuration);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerServices(builder.Configuration);
+
 
 // Configure Identity
 builder.Services.AddIdentity<EUser, IdentityRole>(options =>

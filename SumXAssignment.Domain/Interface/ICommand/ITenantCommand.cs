@@ -10,5 +10,9 @@ namespace SumXAssignment.Domain.Interface.ICommand
     public interface ITenantCommand
     {
         Task<string> CreateTenantAsync(ETenant tenant, CancellationToken cancellationToken = default);
+        Task UpdateTenantAsync(ETenant tenant, CancellationToken cancellationToken);
+
+        Task DeleteTenantAsync(ETenant tenant, CancellationToken cancellationToken);
+
     }
 }

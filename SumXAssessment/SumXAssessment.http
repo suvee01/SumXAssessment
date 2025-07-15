@@ -1,6 +1,88 @@
-@SumXAssessment_HostAddress = http://localhost:5280
+@SumXAssessment_HostAddress = https://localhost:7046
 
-GET {{SumXAssessment_HostAddress}}/weatherforecast/
-Accept: application/json
+### Admin Login
+POST {{SumXAssessment_HostAddress}}/api/v1/auth/login
+Content-Type: application/json
 
-###
+{
+  "email": "admin@system.com",
+  "password": "Admin@123"
+}
+
+### Create Tenant (Admin only)
+POST {{SumXAssessment_HostAddress}}/api/v1/tenant/CreateTenant
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "name": "Test Company",
+  "emailAddress": "tenant@testcompany.com"
+}
+
+### Tenant Login (Use generated password: Tenant + TenantId)
+POST {{SumXAssessment_HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "tenant@testcompany.com",
+  "password": "TenantT1"
+}
+
+### Register User (Tenant only)
+POST {{SumXAssessment_HostAddress}}/api/v1/auth/register
+Content-Type: application/json
+Authorization: Bearer {{tenant_token}}
+
+{
+  "email": "user@testcompany.com",
+  "password": "User@123",
+  "fullName": "Test User"
+}
+
+### User Login
+POST {{SumXAssessment_HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@testcompany.com",
+  "password": "User@123"
+}
+
+### Create Employee (Tenant only)
+POST {{SumXAssessment_HostAddress}}/api/v1/employee/create
+Content-Type: application/json
+Authorization: Bearer {{tenant_token}}
+
+{
+  "fullName": "John Doe",
+  "emailAddress": "john.doe@testcompany.com"
+}
+
+### Get All Employees (Tenant only)
+GET {{SumXAssessment_HostAddress}}/api/v1/employee/getall
+Authorization: Bearer {{tenant_token}}
+
+### Get Employee by ID (Tenant only)
+GET {{SumXAssessment_HostAddress}}/api/v1/employee/get/{{employee_id}}
+Authorization: Bearer {{tenant_token}}
+
+### Update Employee (Tenant only)
+PUT {{SumXAssessment_HostAddress}}/api/v1/employee/update
+Content-Type: application/json
+Authorization: Bearer {{tenant_token}}
+
+{
+  "id": "{{employee_id}}",
+  "fullName": "John Doe Updated",
+  "emailAddress": "john.doe.updated@testcompany.com"
+}
+
+### Delete Employee (Tenant only)
+DELETE {{SumXAssessment_HostAddress}}/api/v1/employee/delete/{{employee_id}}
+Authorization: Bearer {{tenant_token}}
+
+### Test Variables
+# Replace these with actual values from responses:
+# {{admin_token}} - Token from admin login
+# {{tenant_token}} - Token from tenant login
+# {{employee_id}} - Employee ID from create employee response

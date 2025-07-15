@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SumXAssginment.Application.DTOs.Request;
 using SumXAssginment.Application.Helper;
 using SumXAssginment.Application.Manager.Interface;
@@ -7,6 +8,7 @@ namespace SumXAssessment.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class TenantController : ControllerBase
     {
         private readonly ITenantManager _manager;

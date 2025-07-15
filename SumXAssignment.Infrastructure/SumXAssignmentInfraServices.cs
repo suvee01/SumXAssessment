@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SumXAssignment.Domain.Interface.ICommand;
@@ -17,6 +17,9 @@ namespace SumXAssignment.Infrastructure
             services.AddScoped<ITenantCommand, TenantCommand>();
             services.AddScoped<IUserCommand, UserCommand>();
             services.AddScoped<ITenantQuery, TenantQuery>();
+            services.AddScoped<IUserQuery, UserQuery>();
+            services.AddScoped<IEmployeeCommand, EmployeeCommand>();
+            services.AddScoped<IEmployeeQuery, EmployeeQuery>();
 
             return services;
         }

@@ -1,4 +1,4 @@
-﻿using SumXAssignment.Domain.Entities;
+using SumXAssignment.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +12,7 @@ namespace SumXAssignment.Domain.Interface.ICommand
         Task<string> AddUserAsync(EUser user, CancellationToken cancellationToken);
         Task<string> AddTenantRoleAsync(string roleName, CancellationToken cancellationToken);
         Task AddUserRoleAsync(string userId, string roleId, CancellationToken cancellationToken);
-
+        Task<string> CreateUserWithPasswordAsync(EUser user, string password, CancellationToken cancellationToken);
+        Task<string?> GetRoleIdByNameAsync(string roleName, CancellationToken cancellationToken);
     }
 }

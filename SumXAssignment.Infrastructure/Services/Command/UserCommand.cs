@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SumXAssignment.Domain.Entities;
 using SumXAssignment.Domain.Interface.ICommand;
@@ -14,14 +14,25 @@ namespace SumXAssignment.Infrastructure.Services.Command
     public class UserCommand : IUserCommand
     {
         private readonly AppDbContext _context;
-        public UserCommand(AppDbContext context)
+        private readonly UserManager<EUser> _userManager;
+        
+        public UserCommand(AppDbContext context, UserManager<EUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
         public async Task<string> AddTenantRoleAsync(string roleName, CancellationToken cancellationToken)
         {
+            // Check if role already exists
+            var existingRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName, cancellationToken);
+            if (existingRole != null)
+            {
+                return existingRole.Id;
+            }
+
             var role = new IdentityRole
             {
+                Id = Guid.NewGuid().ToString(),
                 Name = roleName,
                 NormalizedName = roleName.ToUpper()
             };
@@ -31,20 +42,28 @@ namespace SumXAssignment.Infrastructure.Services.Command
         }
         public async Task<string> AddUserAsync(EUser user, CancellationToken cancellationToken)
         {
-            await _context.AddAsync(user, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+            // Generate password: "Tenant" + TenantId
+            var tenant = await _context.Tenants.FindAsync(user.TenantId);
+            string password = "Tenant" + tenant?.TenantId;
+            
+            var result = await _userManager.CreateAsync(user, password);
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException($"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
+            
             return user.Id;
         }
 
         public async Task AddUserRoleAsync(string userId, string roleId, CancellationToken cancellationToken)
         {
-            var Identityrole = new IdentityUserRole<string>
+            var user = await _userManager.FindByIdAsync(userId);
+            var role = await _context.Roles.FindAsync(roleId);
+            
+            if (user != null && role != null)
             {
-                UserId = userId,
-                RoleId = roleId 
-            };
-            await _context.AddAsync(Identityrole, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+                await _userManager.AddToRoleAsync(user, role.Name);
+            }
         }
     }
 }

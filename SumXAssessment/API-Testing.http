@@ -1,0 +1,79 @@
+### Authentication - Login as Admin
+POST {{host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@system.com",
+  "password": "Admin@123"
+}
+
+### Variables
+@host = https://localhost:7000
+@adminToken = YOUR_ADMIN_TOKEN_HERE
+@tenantToken = YOUR_TENANT_TOKEN_HERE
+
+### Tenant Management (Admin Only)
+
+### Create Tenant
+POST {{host}}/api/v1/tenant/CreateTenant
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Test Company",
+  "emailAddress": "testcompany@example.com"
+}
+
+### User Registration (Tenant Users Only)
+
+### Register User
+POST {{host}}/api/v1/user/register
+Content-Type: application/json
+Authorization: Bearer {{tenantToken}}
+
+{
+  "email": "newuser@testcompany.com",
+  "password": "NewUser@123",
+  "fullName": "New User"
+}
+
+### Employee Management (Tenant Users Only)
+
+### Create Employee
+POST {{host}}/api/v1/employee
+Content-Type: application/json
+Authorization: Bearer {{tenantToken}}
+
+{
+  "fullName": "John Doe",
+  "emailAddress": "john.doe@testcompany.com"
+}
+
+### Get All Employees
+GET {{host}}/api/v1/employee
+Authorization: Bearer {{tenantToken}}
+
+### Get Employee by ID
+GET {{host}}/api/v1/employee/EMPLOYEE_ID_HERE
+Authorization: Bearer {{tenantToken}}
+
+### Update Employee
+PUT {{host}}/api/v1/employee/EMPLOYEE_ID_HERE
+Content-Type: application/json
+Authorization: Bearer {{tenantToken}}
+
+{
+  "fullName": "John Smith",
+  "emailAddress": "john.smith@testcompany.com"
+}
+
+### Delete Employee
+DELETE {{host}}/api/v1/employee/EMPLOYEE_ID_HERE
+Authorization: Bearer {{tenantToken}}
+
+### Testing Flow Instructions:
+### 1. First, login as admin using the admin credentials
+### 2. Use the admin token to create a tenant
+### 3. Login as the tenant user (email from tenant creation, password = "Tenant" + TenantId)
+### 4. Use the tenant token to register new users and manage employees
+### 5. All employee operations are isolated to the tenant's context

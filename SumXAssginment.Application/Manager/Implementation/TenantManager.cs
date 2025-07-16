@@ -1,4 +1,4 @@
-﻿using SumXAssginment.Application.DTOs.Request;
+using SumXAssginment.Application.DTOs.Request;
 using SumXAssginment.Application.Helper;
 using SumXAssginment.Application.Manager.Interface;
 using SumXAssignment.Domain.Entities;
@@ -44,8 +44,8 @@ namespace SumXAssginment.Application.Manager.Implementation
 
                 string tenantId = await _tenantQuery.GenerateNextTenantIdAsync();
                 var eTenant = ParseToETenant(command, tenantId);
-                await _tenantCommand.CreateTenantAsync(eTenant, cancellationToken);
-                var eUser = ParseToEUser(command);
+                string createdTenantId = await _tenantCommand.CreateTenantAsync(eTenant, cancellationToken);
+                var eUser = ParseToEUser(command, createdTenantId);
                 string userId = await _userCommand.AddUserAsync(eUser, cancellationToken);
                 string roleId = await _userCommand.AddTenantRoleAsync("Tenant", cancellationToken);
                 await _userCommand.AddUserRoleAsync(userId, roleId, cancellationToken);
@@ -69,7 +69,7 @@ namespace SumXAssginment.Application.Manager.Implementation
             return tenant;
         }
 
-        private EUser ParseToEUser(TenantDto command)
+        private EUser ParseToEUser(TenantDto command, string tenantId)
         {
             var user = new EUser()
             {
@@ -77,7 +77,7 @@ namespace SumXAssginment.Application.Manager.Implementation
                 UserName = command.EmailAddress,
                 Email = command.EmailAddress,
                 EmailConfirmed = true,
-                TenantId = command.Id,
+                TenantId = tenantId,
             };
             return user;
         }

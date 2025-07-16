@@ -146,12 +146,12 @@ namespace SumXAssginment.Application.Manager.Implementation
             }
         }
 
-        private ResponseStatus<T> Response<T>(bool isSuccess, string message, T data) where T : class
+        private ResponseStatus<T> Response<T>(bool isSuccess, string message, T data)
         {
             return new ResponseStatus<T>
             {
                 Status = isSuccess ? (int)HttpStatusCode.OK : (int)HttpStatusCode.BadRequest,
-                Data = isSuccess ? data : null!,
+                Data = isSuccess ? data : default!,
                 Message = message
             };
         }

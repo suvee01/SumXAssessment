@@ -8,7 +8,7 @@ SumX Assessment for .NET Developer includes:
 and then update the db : 
 -----------update-database----
 
---Use SumX branch in git.
+--Use master branch in git.
 -Rebuild the solution and run the project. 
 -Core: domain Entities, business rules.
 -Application: Implemented CQRS, DTOs, service Interfaces.
